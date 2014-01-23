@@ -1,0 +1,161 @@
+@(title: String)
+
+@main(title) {
+
+    <h1 class="ui block header black">
+        @title
+        <p class="sub header"> Seeing is Believing :)</p>
+    </h1>
+
+    <div id="toolbar" class="ui segment">
+        <div id="call-button" class="ui button instagram toggle">
+            <i class="icon dashboard"></i>
+            <span class="text">Config</span>
+        </div>
+    </div>
+
+    <div id="tables" class="three column doubling ui grid equal height"></div>
+
+    <div id="control" class="ui sidebar red vertical menu">
+        <div class="header item">Configurations</div>
+        <div class="content item">
+            <form id="config" class="ui form">
+                <div class="field">
+                    <label>Output</label>
+                    <div id="output" placeholder="Output" class="ui selection dropdown">
+                        <input type="hidden" name="output" value="HTML">
+                        <div class="default text"></div>
+                        <i class="icon dropdown"></i>
+                        <div class="menu">
+                            <div data-value="HTML" class="item">HTML</div>
+                            <div data-value="WIKI" class="item">WIKI</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Sub Module</label>
+                    <div id="output" placeholder="Sub Module" class="ui selection dropdown">
+                        <input type="hidden" name="module" value="PRC">
+                        <div class="default text"></div>
+                        <i class="icon dropdown"></i>
+                        <div class="menu">
+                            <div data-value="CAT" class="item">PDM</div>
+                            <div data-value="MER" class="item">Merchandising</div>
+                            <div data-value="PRC" class="item">Pricing</div>                            
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="actions item">
+            <div id="execute-button" class="ui button positive labeled">
+                <i class="icon play"></i>
+                <span class="text">Draw</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="spinner"></div>
+
+    <script src="http://underscorejs.org/underscore-min.js"></script>
+    <script src='http://d3js.org/d3.v3.min.js'></script>
+    <script src='http://labratrevenge.com/d3-tip/javascripts/d3.tip.min.js'></script>
+    <script src='http://fgnass.github.io/spin.js/spin.min.js'></script>
+    <script src='http://fgnass.github.io/spin.js/jquery.spin.js'></script>
+
+    <script type="application/javascript">    
+    $(document).ready(function() {
+      $('.ui.sidebar').first().sidebar('attach events', '#call-button');
+      $('.ui.selection.dropdown').dropdown();
+      $('#execute-button').on('click', loadTables);
+    });
+
+    function loadTables() {
+      var tables = $("#tables");  
+      tables.html("");  
+      $('#spinner').spin({length:50, radius: 30, width: 15, top: 200});
+      d3.json('/schema/json', function (error, data) {
+        $('#spinner').spin(false);
+        
+        var loader;
+        if ($("input[name='output']").val() === "HTML") {
+          loader = loadHTMLTables;  
+        } else {
+          loader = loadWIKITables;  
+        }
+
+        var prefix = $("input[name='module']").val();
+        data = _.filter(data, function(table) {
+            if (prefix === "PRC") {
+                return !(table.name.indexOf("CAT") == 0 || table.name.indexOf("MER") == 0);
+            } else {
+                return table.name.indexOf(prefix) == 0;
+            }           
+        });
+        _.forEach(data, function(table, i) {
+            var container = $("<div></div>").addClass("ui segment" ).append($("<div></div>" ).addClass("ui ribbon black label" ).text(table.name));
+            loader(table, container);
+            tables.append($("<div></div>").addClass("column").append(container).append($("<p/>")));
+        });    
+
+      });
+    }
+
+    function loadHTMLTables(table, container) {
+        var attrs = [" ", "Name", "Type"];
+
+        var t = $("<table></table>" ).addClass("ui table segment" );
+        var h = $("<tr></tr>");
+        _.forEach(attrs, function(attr) {
+          h.append($("<th></th>" ).text(attr.toUpperCase()));
+        });
+        var b = $("<tbody></tbody>");
+        _.forEach(table.columns, function(column){
+            var r = $("<tr></tr>" );
+            var n = $("<td></td>" );
+            if (column.primaryKey) {
+                r.addClass("warning");
+                n.addClass("warning").append($("<i></i>" ).addClass("key icon"));
+            } else if (!column.nullable) {
+                n.addClass("warning").append($("<i></i>" ).addClass("bullseye icon"));
+            }
+            _.forEach(table.indices, function(index, i){
+                if(_.contains(index.columns, column.name)) {
+                  n.append($("<span></span>" ).addClass("ui green circular label" ).text(i + 1));
+                }
+            });
+            r.append(n).append($("<td></td>" ).text(column.name)).append($("<td></td>" ).text(column.type) );
+            b.append(r);
+        });
+        container.append(t.append($("<thead></thead>" ).append(h) ).append(b));
+    }
+
+    function loadWIKITables(table, container) {
+        var html = ["h3. " + table.name + '\n'];
+        html.push("h5. Description\n");
+        html.push("h5. JDO Mappings\n");
+        html.push("h5. Schema\n");
+        var attrs = ["Name", "Type", "Primary Key", "Foreign Key", "Nullable"];
+        for(var i = 1; i <= table.indices.length; i++) {
+            attrs[attrs.length] = ("Index " + i);
+        }
+        html.push("||" + attrs.join("||") + "||" + " Description ||");
+        
+         _.forEach(table.columns, function(column) {
+            var r = [];
+            r.push(column.name);
+            r.push(column.type);
+            r.push(column.primaryKey ? "(/)": " ");
+            r.push(" ");
+            r.push(column.nullable ? " ": "(x)");
+            _.forEach(table.indices, function(index, i){
+                r.push(_.contains(index.columns, column.name) ? "(/)": " ");
+            });
+            r.push(" ");
+            html.push("|" + r.join("|") + "|");
+        });
+        container.append($('<div></div>').addClass('ui field').append($("<textarea></textarea>").addClass('code').css('width', '100%').css('height', '80px').val(html.join("\n"))));
+    }
+
+    </script>
+}

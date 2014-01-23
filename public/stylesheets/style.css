@@ -1,0 +1,132 @@
+html,
+body {
+  font-size: 15px;
+  height: 100%;
+}
+body {
+  font-family: "Open Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  background: #FFFFFF;
+  margin: 0px;
+  padding: 0px;
+  color: #555555;
+  text-rendering: optimizeLegibility;
+  min-width: 320px;
+}
+.ui.header {
+  font-family: 'Source Sans Pro', "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+}
+/*******************************
+            Global
+*******************************/
+/*-------------------
+        Sidebar
+--------------------*/
+#stuff .sidebar {
+  overflow: visible;
+}
+/*-------------------
+        Grid
+--------------------*/
+#stuff .grid {
+  height: 100%;
+}
+#stuff > .grid > .column {
+  height: 100%;
+}
+/*-------------------
+       Inbox
+--------------------*/
+#stuff .inbox.tab {
+  background-color: #FFFFFF;
+}
+#stuff .inbox.tab .item {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+#stuff .inbox.tab .item .rating {
+  margin-top: 0.2rem;
+}
+#stuff .inbox.tab .item .description {
+  margin-left: 2em;
+}
+#stuff .page {
+  float: right;
+  margin-top: 0.9em;
+}
+#stuff .middle.column {
+  padding: 1em 2em;
+}
+#stuff .middle.column h2 {
+  margin-top: 0em;
+}
+#stuff .right.column {
+  padding: 1em 2em;
+  background-color: #FAFAFA;
+}
+div.readme img {
+  max-width: 600px;
+  max-height: 600px;
+}
+div.readme pre {
+  background-color: lightgray;
+  padding: 5px;
+  margin: 5px;
+}
+div.readme pre code {
+  font-family: 'Droid Sans Mono', monospace;
+  font-size: small;
+}
+/*******************************
+          Responsive
+*******************************/
+@media only screen and (max-width: 1000px) {
+  #stuff .inbox .date {
+    float: none;
+    margin-bottom: 0.5em;
+  }
+}
+@media only screen and (max-width: 1250px) {
+  #stuff .left.column > .menu .item {
+    font-size: 1rem;
+  }
+}
+#chart .axis path,
+#chart .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+#chart .line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+#chart .line-label {
+  font-size: .75em;
+}
+#chart .circle {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2.2px;
+}
+#chart .title {
+  font-weight: bold;
+}
+.d3-tip {
+  font-size: 0.8em;
+  background-color: rgba(200, 200, 200, 0.85);
+  border-radius: 5px;
+  border-width: 5px;
+  border-color: rgba(200, 200, 200, 0.85);
+  padding: 5px;
+}
+.d3-tip .type {
+  color: darkmagenta;
+}
+.d3-tip .time {
+  color: darkblue;
+}
+.d3-tip .measure {
+  color: #ffffff;
+  font-weight: 600;
+}
