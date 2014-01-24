@@ -1,0 +1,126 @@
+@(title: String)
+
+@main(title) {
+
+    <h1 class="ui block header black">
+        @title
+        <p class="sub header"> Eyes on Changes :)</p>
+    </h1>
+
+    <div id="toolbar" class="ui segment">
+        <div id="call-button" class="ui button instagram toggle">
+            <i class="icon dashboard"></i>
+            <span class="text">Config</span>
+        </div>
+        <div class="ui button google plus toggle floated right" onclick="location.href = '/';">
+            <i class="icon browser"></i>
+            <span class="text">Portal</span>
+        </div>
+    </div>
+
+    <div id="tables" class="two column doubling ui grid equal height"></div>
+
+    <div id="control" class="ui sidebar red vertical menu">
+        <div class="header item">Configurations</div>
+        <div class="content item">
+            <form id="config" class="ui form">
+                <div class="field">
+                    <label>Owner</label>
+                    <input type="text" placeholder="Owner" name="owner" value="kchen">
+                </div>
+                <div class="field">
+                    <label>Repo</label>
+                    <input type="text" placeholder="Repo" name="repo" value="pacific-catalog-pricing">
+                </div>
+                <div class="field">
+                    <label>Since</label>
+                    <input type="text" placeholder="Since" name="since" value="20140101">
+                </div>
+                <div class="field">
+                    <label>Keywords</label>
+                    <textarea name="keywords" style="height : 450px ;">pricing</textarea>
+                    <p class="ui label detail bottom right attached">Separated by CRLFs</p>
+                </div>
+            </form>
+        </div>
+        <div class="actions item">
+            <div id="execute-button" class="ui button positive labeled">
+                <i class="icon play"></i>
+                <span class="text">Watch</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="spinner"></div>
+
+    <script src="http://underscorejs.org/underscore-min.js"></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/rxjs/2.2.10/rx.min.js'></script>
+    <script src='http:////cdnjs.cloudflare.com/ajax/libs/rxjs/2.2.10/rx.async.min.js'></script>
+    <script src='http://fgnass.github.io/spin.js/spin.min.js'></script>
+    <script src='http://fgnass.github.io/spin.js/jquery.spin.js'></script>
+
+    <script type="application/javascript">    
+    $(document).ready(function() {
+      $('.ui.sidebar').first().sidebar('attach events', '#call-button');
+      $('#execute-button').on('click', loadChanges);
+    });
+
+    function loadChanges() {
+      var tables = $("#tables");  
+      tables.html("");  
+      $('#spinner').spin({length:50, radius: 30, width: 15, top: 200});
+
+      searchCommits().subscribe(function(commit) {
+        console.log("each");        
+        loadHTMLTables(commit, tables);
+      }, function(e) {
+        console.log("error");
+        $('<li>Error: ' + e + '</li>').appendTo(tables);
+      }, function() {
+        console.log("complete");
+        $('#spinner').spin(false);
+      });      
+    }
+
+    function searchCommits () {
+        var promise = $.ajax({
+            url: '/github/commits/' + $('input[name="owner"]').val() + '/' + $('input[name="repo"]').val() + '?since=' + $('input[name="since"]').val(),
+            dataType: 'json'
+        }).promise();
+        return Rx.Observable.fromPromise(promise);
+    }
+
+    function loadHTMLTables(commit, tables) {
+        var keywords = $('textarea[name="keywords"]').val().toUpperCase().split('\n');
+        var files = _.filter(commit.files, function(file){ return _.find(keywords, function(word) { return file.full_path.toUpperCase().indexOf(word) >= 0; }); });
+        if (files.length === 0) return;
+
+        var attrs = ["committer", "commit_date", "files"];
+
+        var t = $("<table></table>" ).addClass("ui table segment" );
+        var h = $("<tr></tr>");
+        var r = $("<tr></tr>" );
+        _.forEach(attrs, function(attr) {
+          h.append($("<th></th>" ).text(attr.toUpperCase()));
+          if (attr === 'files') {
+            var d = $("<div></div>").addClass('ui list');
+            _.forEach(files, function(file) {
+                d.append($("<div></div>").addClass('item').append(
+                    $("<div></div>").addClass('content')
+                        .append($("<div></div>").addClass('header').css('font-size', '0.8em').text(file.file))
+                        .append($("<div></div>").addClass('small description').css('font-size', '0.75em').text(file.path))));
+            });
+            r.append($("<td></td>").append(d));
+          } else {
+            r.append($("<td></td>").css("vertical-align", "top").text(commit.meta[attr]));
+          }
+        });
+        var b = $("<tbody></tbody>");
+        b.append(r);   
+        var container = $("<div></div>").addClass("ui segment" ).append($("<div></div>" ).addClass("ui ribbon black label" ).text('SHA: ' + commit.meta.sha.substring(0, 10)));     
+        container.append(t.append($("<thead></thead>" ).append(h) ).append(b));
+        tables.append($("<div></div>").addClass("column").append(container).append($("<p/>")));
+    }    
+
+    </script>
+}

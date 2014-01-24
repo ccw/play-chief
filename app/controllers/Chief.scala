@@ -14,6 +14,7 @@ import play.api.mvc.SimpleResult
 import org.stringtemplate.v4.ST
 import scala.collection.JavaConversions._
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.Logger
 
 object Chief extends Controller {
 
@@ -36,9 +37,15 @@ object Chief extends Controller {
 
   val dFormat: DecimalFormat = new DecimalFormat("#,###.0")
 
+  def index = Action {
+    Ok(views.html.chief("Playing with Chief."))
+  }
+
   def graph = Action {
     implicit req =>
-      val values = Jsoup.parse(Http(url(getUrlFrom(req.queryString)) OK as.String).apply())
+      val pagingChief: String = getUrlFrom(req.queryString)
+      Logger.debug("paging chief with " + pagingChief)
+      val values = Jsoup.parse(Http(url(pagingChief) OK as.String).apply())
         .select("area").iterator.toList.map {
         case e: Element =>
           val contents = e.attr("title").split("\n")

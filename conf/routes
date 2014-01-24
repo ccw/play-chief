@@ -3,14 +3,16 @@
 # ~~~~
 
 # Home page
-GET        /                            controllers.Application.index
-GET        /graph                       controllers.Chief.graph
-GET        /fake                        controllers.Chief.fake
-GET        /github/commits/:repo        controllers.GitHub.commits(repo:String)
-GET        /schema                      controllers.Schema.index
-GET        /schema/json                 controllers.Schema.json
+GET        /                                   controllers.Application.index
+GET        /chief                              controllers.Chief.index
+GET        /chief/graph                        controllers.Chief.graph
+GET        /chief/fake                         controllers.Chief.fake
+GET        /github                             controllers.GitHub.index
+GET        /github/commits/:owner/:repo        controllers.GitHub.commits(owner:String, repo:String)
+GET        /schema                             controllers.Schema.index
+GET        /schema/json                        controllers.Schema.json
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file                controllers.Assets.at(path="/public", file)
+GET        /assets/*file                       controllers.Assets.at(path="/public", file)
 
     

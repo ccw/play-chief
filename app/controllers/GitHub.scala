@@ -1,22 +1,18 @@
 package controllers
 
-import play.api.mvc.{Action, Controller}
+import play.api.mvc._
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json._
-import org.jsoup.Jsoup
 import dispatch._
-import org.jsoup.nodes.Element
-import org.jsoup.helper.StringUtil
 import scala._
-import play.api.libs.json.JsArray
-import play.api.mvc.ResponseHeader
-import play.api.mvc.SimpleResult
-import play.api.libs.json.JsNumber
 import org.stringtemplate.v4.ST
 import java.text.SimpleDateFormat
 import play.api.libs.concurrent.Execution.Implicits._
 import play.Logger
-import rx.lang.scala.{Subscription, Observer, Observable}
+import java.util.Date
+import play.api.libs.json.JsArray
+import play.api.libs.json.JsString
+import play.api.libs.json.JsObject
 
 /**
  * GitHub 
@@ -25,17 +21,24 @@ import rx.lang.scala.{Subscription, Observer, Observable}
  */
 object GitHub extends Controller {
 
-  val apiURLTemplate = "http://github.digitalriverws.net/api/v3/repos/GlobalCommerce/pacific-<repo>/commits?since=<since>"
-  val inFormat = "yyyy/MM/dd"
+  val apiURLTemplate = "http://github.digitalriverws.net/api/v3/repos/<owner>/<repo>/commits?since=<since>"
+  val inFormat = "yyyyMMdd"
   val outFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
 
-  def commits(repo:String) = Action {
+  def index = Action {
+    Ok(views.html.github("GitHub Monitor"))
+  }
+
+  def commits(owner:String, repo:String) = Action {
     implicit req =>
-      val target = getUrlFrom(Map("repo" -> repo, "since" -> formatDate(req.queryString("since").mkString)))
+      val target = getUrlFrom(Map("owner" -> owner, "repo" -> repo, "since" -> formatDate(req.queryString("since") match {
+        case date:Seq[String] => date.mkString
+        case _ => new SimpleDateFormat(inFormat).format(new Date())
+      })))
       Logger.debug("To invoke [" + target + "]")
-      val values = query(target).as[JsArray].value.map( commit =>
+      val commits = query(target).as[JsArray].value.map( commit =>
         Json.obj(
-            "commit" -> Json.obj(
+            "meta" -> Json.obj(
               "sha" -> (commit \ "sha"),
               "committer" -> (commit \ "commit" \ "committer" \ "name"),
               "commit_date" -> (commit \ "commit" \ "committer" \ "date")
@@ -43,11 +46,7 @@ object GitHub extends Controller {
             "url" -> JsString((commit \ "commit" \ "tree" \ "url").as[JsString].value + "?recursive=1")
         )
       )
-      fetchTreeContents(values)
-      SimpleResult(
-        header = ResponseHeader(200, Map(CONTENT_TYPE -> "application/json")),
-        body = Enumerator(Json.stringify(JsArray(values)).getBytes)
-      )
+    Ok.chunked(fetchTreeContents(commits)).as("application/json")
   }
 
   def query(URL:String) = {
@@ -66,12 +65,30 @@ object GitHub extends Controller {
     template.render
   }
 
-  def fetchTreeContents(trees:Seq[JsObject]) = {
-      Observable(trees:_*)
-        .map(tree => query((tree \ "url").as[JsString].value).as[JsObject] + ("commit", tree \ "commit"))
-        .filter(jsTrees => (jsTrees \ "tree" \\ "path")
-                .filter( _.as[JsString].value.indexOf("catalog") > -1 ).nonEmpty )
-        .subscribe(tree => Logger.debug("Found files [" + (tree \ "tree" \\ "path").mkString(",") + "] @ commit -> " + Json.stringify(tree \ "commit")))
+  def fetchTreeContents(commits:Seq[JsObject]) = {
+    Enumerator(commits: _*).map(
+      commit => query((commit \ "url").as[JsString].value).as[JsObject] +("meta", commit \ "meta")).map(
+        commit => {
+          Json.obj(
+            "meta" -> commit \ "meta",
+            "files" -> JsArray((commit \ "tree" \\ "path").map(path => {
+              val strPath = path.as[JsString].value
+              val folder = strPath.lastIndexOf("/") match {
+                case n:Int if n >= 0 => strPath.substring(0, n + 1)
+                case _ => "/"
+              }
+              val file = folder match {
+                case "/" => strPath
+                case _ => strPath.replace(folder, "")
+              }
+              Json.obj(
+                "full_path" -> path,
+                "path" -> JsString(folder),
+                "file" -> JsString(file)
+              )
+            }))
+          )
+        })
   }
 
 }

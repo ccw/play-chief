@@ -1,0 +1,183 @@
+@(title: String)
+
+@main(title) {
+
+    <h1 class="ui block header black">
+        @title
+        <p class="sub header"> FireChief becomes prettier :)</p>
+    </h1>
+
+    <div id="toolbar" class="ui segment">
+        <div id="call-button" class="ui button instagram toggle">
+            <i class="icon dashboard"></i>
+            <span class="text">Config</span>
+        </div>
+        <div class="ui button google plus toggle floated right" onclick="location.href = '/';">
+            <i class="icon browser"></i>
+            <span class="text">Portal</span>
+        </div>
+    </div>
+
+    <div class="ui grid one column">
+        <div id="chart" class="column"></div>
+    </div>
+
+    <div id="control" class="ui sidebar red vertical menu">
+        <div class="header item">Configurations</div>
+        <div class="content item">
+            <form id="config" class="ui form">
+                <div class="field">
+                    <label>Measure</label>
+                    <div id="measure" placeholder="Measure" class="ui selection dropdown">
+                        <input type="hidden" name="measure" value="elapsed_millis">
+                        <div class="default text">Overall</div>
+                        <i class="icon dropdown"></i>
+                        <div class="menu">
+                            <div data-value="elapsed_millis" class="item">Overall</div>
+                            <div data-value="db_communication_time_millis" class="item">DB Only</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Data Source</label>
+                    <div id="ds" placeholder="Data Source" class="ui selection dropdown">
+                        <input type="hidden" name="ds" value="drh_read@@drhprd03">
+                        <div class="default text">drh_read@@drhprd03</div>
+                        <i class="icon dropdown"></i>
+                        <div class="menu">
+                            <div data-value="drh_read@@drhprd01" class="item">drh_read@@drhprd01</div>
+                            <div data-value="drh_read@@drhprd03" class="item">drh_read@@drhprd03</div>
+                            <div data-value="drh_read@@ordprd16" class="item">drh_read@@ordprd16</div>
+                            <div data-value="drh_read@@ordprd19" class="item">drh_read@@ordprd19</div>
+                            <div data-value="drh_read@@ordprd21" class="item">drh_read@@ordprd21</div>
+                            <div data-value="drh_read@@ordprd22" class="item">drh_read@@ordprd22</div>
+                            <div data-value="drh_read@@ordprd23" class="item">drh_read@@ordprd23</div>
+                            <div data-value="drh_read@@ordprd24" class="item">drh_read@@ordprd24</div>
+                            <div data-value="drh_read@@ordprd25" class="item">drh_read@@ordprd25</div>
+                            <div data-value="drh_read@@ordprd26" class="item">drh_read@@ordprd26</div>
+                            <div data-value="drh_read@@ordprd28" class="item">drh_read@@ordprd28</div>
+                            <div data-value="drh_read@@ordprd29" class="item">drh_read@@ordprd29</div>
+                            <div data-value="drh_read@@ordprd33" class="item">drh_read@@ordprd33</div>
+                            <div data-value="drh_read@@ordprd34" class="item">drh_read@@ordprd34</div>
+                            <div data-value="drh_read@@ordprd35" class="item">drh_read@@ordprd35</div>
+                            <div data-value="drh_read@@ordprd36" class="item">drh_read@@ordprd36</div>
+                            <div data-value="drh_read@@ordprd37" class="item">drh_read@@ordprd37</div>
+                            <div data-value="drh_read@@ordprd38" class="item">drh_read@@ordprd38</div>
+                            <div data-value="drh_read@@ordprd40" class="item">drh_read@@ordprd40</div>
+                            <div data-value="drh_read@@ordprd41" class="item">drh_read@@ordprd41</div>
+                            <div data-value="drh_read@@ordprd42" class="item">drh_read@@ordprd42</div>
+                            <div data-value="drh_read@@ordprd43" class="item">drh_read@@ordprd43</div>
+                            <div data-value="drh_read@@ordprd44" class="item">drh_read@@ordprd44</div>
+                            <div data-value="drh_read@@ordprd45" class="item">drh_read@@ordprd45</div>
+                            <div data-value="drh_read@@ordprd46" class="item">drh_read@@ordprd46</div>
+                            <div data-value="drh_read@@ordprd47" class="item">drh_read@@ordprd47</div>
+                            <div data-value="drh_read@@ordprd48" class="item">drh_read@@ordprd48</div>
+                            <div data-value="drh_read@@ordprd49" class="item">drh_read@@ordprd49</div>
+                            <div data-value="drh_read@@drhint01" class="item">drh_read@@drhint01</div>
+                            <div data-value="drh_read@@ordint16" class="item">drh_read@@ordint16</div>
+                            <div data-value="drh_read@@drhsys01" class="item">drh_read@@drhsys01</div>
+                            <div data-value="drh_read@@ordsys16" class="item">drh_read@@ordsys16</div>
+                            <div data-value="drh_read@@drhdev01" class="item">drh_read@@drhdev01</div>
+                            <div data-value="drh_read@@ordcte16" class="item">drh_read@@ordcte16</div>
+                            <div data-value="drh_read@@drhcte01" class="item">drh_read@@drhcte01</div>
+                            <div data-value="drh_read@@drhlte01" class="item">drh_read@@drhlte01</div>
+                            <div data-value="drh_read@@shrlte11" class="item">drh_read@@shrlte11</div>
+                            <div data-value="drh_read@@shrlte12" class="item">drh_read@@shrlte12</div>
+                            <div data-value="drh_read@@ordlte11" class="item">drh_read@@ordlte11</div>
+                            <div data-value="drh_read@@ordlte12" class="item">drh_read@@ordlte12</div>
+                            <div data-value="drh_read@@ordlte13" class="item">drh_read@@ordlte13</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Period</label>
+                    <div id="period" placeholder="Period" class="ui selection dropdown">
+                        <input type="hidden" name="period" value="yesterday">
+                        <div class="default text">yesterday</div>
+                        <i class="icon dropdown"></i>
+                        <div class="menu">
+                            <div data-value="last2hours" class="item">last2hours</div>
+                            <div data-value="last4hours" class="item">last4hours</div>
+                            <div data-value="last8hours" class="item">last8hours</div>
+                            <div data-value="last12hours" class="item">last12hours</div>
+                            <div data-value="last24hours" class="item">last24hours</div>
+                            <div data-value="yesterday" class="item">yesterday</div>
+                            <div data-value="last2days" class="item">last2days</div>
+                            <div data-value="last3days" class="item">last3days</div>
+                            <div data-value="last7days" class="item">last7days</div>
+                            <div data-value="last30days" class="item">last30days</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Site</label>
+                    <input type="text" placeholder="Site" name="site" value="mseea">
+                </div>
+                <div class="field">
+                    <label>URLs</label>
+                    <textarea name="urls" style="height : 450px ;">/gc/ent/catalog/editProduct.do</textarea>
+                    <p class="ui label detail bottom right attached">Separated by CRLFs</p>
+                </div>
+            </form>
+        </div>
+        <div class="actions item">
+            <div id="execute-button" class="ui button positive labeled">
+                <i class="icon play"></i>
+                <span class="text">Draw</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="spinner"></div>
+
+    <script src="http://underscorejs.org/underscore-min.js"></script>
+    <script src='http://d3js.org/d3.v3.min.js'></script>
+    <script src='http://labratrevenge.com/d3-tip/javascripts/d3.tip.min.js'></script>
+    <script src='http://fgnass.github.io/spin.js/spin.min.js'></script>
+    <script src='http://fgnass.github.io/spin.js/jquery.spin.js'></script>
+    <script src='@routes.Assets.at("javascripts/chart.js")'></script>
+
+    <script type="application/javascript">
+    $(document).ready(function() {
+            $('.ui.sidebar').first().sidebar('attach events', '#call-button');
+            $('#execute-button').on('click', function() {
+                $('#spinner').spin({length:50, radius: 30, width: 15, top: 200});
+                $('#chart svg').remove();
+                draw(getQueryOptions());
+            });
+            $('.ui.selection.dropdown').dropdown();
+            loadPreviousOptions();
+        });
+
+        function loadPreviousOptions() {
+            if ('localStorage' in window && window['localStorage'] !== null && window['localStorage']['qOptions']) {
+                var qOptions = JSON.parse(window['localStorage']['qOptions']);
+                if (qOptions && 'ds' in qOptions) {
+                    $('div#ds').dropdown('set value', qOptions['ds']);
+                    $('div#ds').dropdown('set selected', qOptions['ds']);
+                    $('div#period').dropdown('set value', qOptions['period']);
+                    $('div#period').dropdown('set selected', qOptions['period']);
+                    $('div#measure').dropdown('set value', qOptions['measure']);
+                    $('div#measure').dropdown('set selected', qOptions['measure']);
+                    var form = $('#config');
+                    form.find('input[name="site"]').val(qOptions['site']);
+                    form.find('textarea[name="urls"]').val(qOptions['urls'].join('\n'));
+                }
+            }
+        }
+        function getQueryOptions() {
+            var form = $('#config');
+            var qOptions = {'ds': form.find('input[name="ds"]').val(),
+                            'measure': form.find('input[name="measure"]').val(),
+                            'period': form.find('input[name="period"]').val(),
+                            'site': form.find('input[name="site"]').val(),
+                            'urls': form.find('textarea[name="urls"]').val().split('\n')};
+            if ('localStorage' in window && window['localStorage'] !== null) {
+                window['localStorage']['qOptions'] = JSON.stringify(qOptions);
+            }
+            return qOptions;
+        }
+    </script>
+
+
+}

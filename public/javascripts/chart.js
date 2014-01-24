@@ -35,7 +35,7 @@ var tip = d3.tip()
 var uri;
 
 var draw = function (options) {
-    uri = '/graph?' + d3.map(options).entries().map(function(d) {
+    uri = '/chief/graph?' + d3.map(options).entries().map(function(d) {
         if (typeof d.value === 'string') {
             return d.key + "=" + d.value;
         } else {
