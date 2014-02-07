@@ -34,7 +34,7 @@
                 </div>
                 <div class="field">
                     <label>Since</label>
-                    <input type="text" placeholder="Since" name="since" value="20140101">
+                    <input type="text" placeholder="Since" name="since" value="20140201">
                 </div>
                 <div class="field">
                     <label>Keywords</label>
@@ -54,8 +54,6 @@
     <div id="spinner"></div>
 
     <script src="http://underscorejs.org/underscore-min.js"></script>
-    <script src='http://cdnjs.cloudflare.com/ajax/libs/rxjs/2.2.10/rx.min.js'></script>
-    <script src='http:////cdnjs.cloudflare.com/ajax/libs/rxjs/2.2.10/rx.async.min.js'></script>
     <script src='http://fgnass.github.io/spin.js/spin.min.js'></script>
     <script src='http://fgnass.github.io/spin.js/jquery.spin.js'></script>
 
@@ -66,28 +64,53 @@
     });
 
     function loadChanges() {
-      var tables = $("#tables");  
-      tables.html("");  
+      $("#tables").html("");
       $('#spinner').spin({length:50, radius: 30, width: 15, top: 200});
 
-      searchCommits().subscribe(function(commit) {
-        console.log("each");        
-        loadHTMLTables(commit, tables);
-      }, function(e) {
-        console.log("error");
-        $('<li>Error: ' + e + '</li>').appendTo(tables);
-      }, function() {
-        console.log("complete");
-        $('#spinner').spin(false);
-      });      
+      searchCommits();
+//      .subscribe(function(commit) {
+//        console.log("next");
+//        //console.log(commit);
+//        loadHTMLTables(commit, tables);
+//      }, function(e) {
+//        console.log("error");
+//        //console.log(e);
+//        $('<div></div>').addClass("column" ).text(e).appendTo(tables);
+//        $('#spinner').spin(false);
+//      }, function() {
+//        console.log("complete");
+//        $('#spinner').spin(false);
+//      });
     }
 
+    var marker = -1;
     function searchCommits () {
-        var promise = $.ajax({
+        marker = -1;
+        $.ajax({
             url: '/github/commits/' + $('input[name="owner"]').val() + '/' + $('input[name="repo"]').val() + '?since=' + $('input[name="since"]').val(),
-            dataType: 'json'
-        }).promise();
-        return Rx.Observable.fromPromise(promise);
+            dataType: 'text',
+            xhrFields: {
+                onprogress: function (e) {
+                    var t = e.target.response;
+                    if (4 == e.target.readyState) {
+                        $('#spinner').spin(false);
+                        console.log("onComplete");
+                        loadHTMLTables(JSON.parse(t.substring(marker >= 0 ? marker - 2 : 0)), $("#tables"));
+                    } else {
+                        var m = t.lastIndexOf('meta');
+                        console.log("marker => " + marker + ", m => " + m);
+                        if (m >= 0) {
+                            if (marker !== m && marker >= 0) {
+                                loadHTMLTables(JSON.parse(t.substring(marker - 2, m - 2)), $("#tables"));
+                                marker = m;
+                            } else if (marker < 0) {
+                                marker = m;
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     function loadHTMLTables(commit, tables) {
@@ -95,30 +118,44 @@
         var files = _.filter(commit.files, function(file){ return _.find(keywords, function(word) { return file.full_path.toUpperCase().indexOf(word) >= 0; }); });
         if (files.length === 0) return;
 
-        var attrs = ["committer", "commit_date", "files"];
+        var attrs = ["committer", "commit_date"];
 
-        var t = $("<table></table>" ).addClass("ui table segment" );
+        var t = $("<table></table>").addClass("ui table segment" );
         var h = $("<tr></tr>");
-        var r = $("<tr></tr>" );
+        var r = $("<tr></tr>");
         _.forEach(attrs, function(attr) {
           h.append($("<th></th>" ).text(attr.toUpperCase()));
-          if (attr === 'files') {
-            var d = $("<div></div>").addClass('ui list');
-            _.forEach(files, function(file) {
-                d.append($("<div></div>").addClass('item').append(
-                    $("<div></div>").addClass('content')
-                        .append($("<div></div>").addClass('header').css('font-size', '0.8em').text(file.file))
-                        .append($("<div></div>").addClass('small description').css('font-size', '0.75em').text(file.path))));
+          r.append($("<td></td>").css("vertical-align", "top").text(commit.meta[attr]));
+        });
+        var paths = _.reduce(files, function(paths, file) { 
+            if(!_.contains(paths, file.path)) paths.push(file.path); 
+            return paths; 
+        }, []).sort();
+        files = _.groupBy(files, 'path');
+        
+        var d = $("<div></div>").addClass('ui threaded comments');
+        _.forEach(paths, function(path) {
+            var idx = path.indexOf('/');
+            var x = $("<div></div>").addClass('comment').append(
+                $("<div></div>").addClass('avatar').append($('<i></i>').css('font-size', '3em').addClass('folder outline icon')),
+                $("<div></div>").addClass('content').append(
+                    $('<div></div>').addClass('author').css('font-weight', 'bold').text(path.substring(0, idx)),
+                    $('<div></div>').addClass('text').css('font-size', '0.8em').text(path.substring(idx + 1))));
+            var i = $("<div></div>").addClass('comments');
+            _.forEach(files[path], function(file) {
+                i.append($("<div></div>").addClass('comment').append(
+                    $("<div></div>").addClass('content').append(
+                        $("<div></div>").addClass('avatar').append($('<i></i>').css('font-size', '1.2em').addClass('file outline icon')),
+                        $("<div></div>").addClass('text').css('font-size', '0.9em').text(file.file))));
             });
-            r.append($("<td></td>").append(d));
-          } else {
-            r.append($("<td></td>").css("vertical-align", "top").text(commit.meta[attr]));
-          }
+            x.append(i);
+            d.append(x);
         });
         var b = $("<tbody></tbody>");
-        b.append(r);   
+        b.append(r);
         var container = $("<div></div>").addClass("ui segment" ).append($("<div></div>" ).addClass("ui ribbon black label" ).text('SHA: ' + commit.meta.sha.substring(0, 10)));     
         container.append(t.append($("<thead></thead>" ).append(h) ).append(b));
+        container.append(d);
         tables.append($("<div></div>").addClass("column").append(container).append($("<p/>")));
     }    
 
