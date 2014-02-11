@@ -16,7 +16,9 @@ import play.api.libs.json.JsObject
  */
 object GitHub extends Controller {
 
-  val apiURLTemplate = "http://github.digitalriverws.net/api/v3/repos/<owner>/<repo>/commits?since=<since>"
+  val gitHubAPIHost = "http://github.digitalriverws.net/api/v3/repos"
+  val branchAPIURI = gitHubAPIHost + "/<owner>/<repo>/branches"
+  val commitAPIURI = gitHubAPIHost + "/<owner>/<repo>/commits?since=<since>"
   val inFormat = "yyyyMMdd"
   val outFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
 
@@ -26,12 +28,13 @@ object GitHub extends Controller {
 
   def commits(owner: String, repo: String) = Action {
     implicit req =>
-      val target = getUrlFrom(Map("owner" -> owner, "repo" -> repo, "since" -> formatDate(req.queryString("since") match {
+      val params = Map("owner" -> owner, "repo" -> repo, "since" -> formatDate(req.queryString("since") match {
         case date: Seq[String] => date.mkString
         case _ => new SimpleDateFormat(inFormat).format(new Date())
-      })))
-      Logger.debug("To invoke [" + target + "]")
-      Ok.chunked(GitHubJSONParser.parse(target)).as("application/json")
+      }))
+      val commitURI = getUrlFrom(commitAPIURI, params)
+      val branchURI = getUrlFrom(branchAPIURI, params)
+      Ok.chunked(GitHubJSONParser.parse(commitURI, branchURI)).as("application/json")
   }
 
   def formatDate(date: String) = {
@@ -40,8 +43,8 @@ object GitHub extends Controller {
     ofo.format(ifo.parse(date))
   }
 
-  def getUrlFrom(params: Map[String, String]) = {
-    val template = new ST(apiURLTemplate)
+  def getUrlFrom(URI:String, params: Map[String, String]) = {
+    val template = new ST(URI)
     params.foreach(p => template.add(p._1, p._2))
     template.render
   }

@@ -101,7 +101,9 @@
                         console.log("marker => " + marker + ", m => " + m);
                         if (m >= 0) {
                             if (marker !== m && marker >= 0) {
-                                loadHTMLTables(JSON.parse(t.substring(marker - 2, m - 2)), $("#tables"));
+                                var txt = t.substring(marker - 2, m - 2);
+                                //console.log(txt);
+                                loadHTMLTables(JSON.parse(txt), $("#tables"));
                                 marker = m;
                             } else if (marker < 0) {
                                 marker = m;
@@ -114,8 +116,13 @@
     }
 
     function loadHTMLTables(commit, tables) {
+        var files;
         var keywords = $('textarea[name="keywords"]').val().toUpperCase().split('\n');
-        var files = _.filter(commit.files, function(file){ return _.find(keywords, function(word) { return file.full_path.toUpperCase().indexOf(word) >= 0; }); });
+        if (keywords && keywords.length > 0) {
+            files = _.filter(commit.files, function(file){ return _.find(keywords, function(word) { return file.full_path.toUpperCase().indexOf(word) >= 0; }); });
+        } else {
+            files = commit.files;
+        }
         if (files.length === 0) return;
 
         var attrs = ["committer", "commit_date"];
@@ -153,7 +160,8 @@
         });
         var b = $("<tbody></tbody>");
         b.append(r);
-        var container = $("<div></div>").addClass("ui segment" ).append($("<div></div>" ).addClass("ui ribbon black label" ).text('SHA: ' + commit.meta.sha.substring(0, 10)));     
+        b.append($('<tr></tr>').append($('<td></td>').attr('colspan', '2' ).css('font-size', '0.8em' ).text(commit.meta.message)));
+        var container = $("<div></div>").addClass("ui segment" ).append($("<div></div>" ).addClass("ui ribbon black label" ).text('SHA: ' + commit.meta.sha.substring(0, 10) + " Branch:" + commit.meta.branch));
         container.append(t.append($("<thead></thead>" ).append(h) ).append(b));
         container.append(d);
         tables.append($("<div></div>").addClass("column").append(container).append($("<p/>")));

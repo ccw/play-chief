@@ -17,31 +17,40 @@ import play.api.Logger
  */
 object GitHubJSONParser {
 
-  def parse(target:String) = {
-    val meta = query(target).as[JsArray].value.map( metaData =>
+  def parse(commitURI:String, branchURI:String):Enumerator[JsObject] = {
+    ((Enumerator((branchURI, commitURI)) &> toJSONBranches).flatMap(branches => Enumerator(branches.map(fetchCommit).flatten: _*)) &> toJSONCommits) >>> Enumerator.eof
+  }
+
+  def toJSONBranches = Enumeratee.map[(String, String)] { uris =>
+    query(uris._1).as[JsArray].value.map( branch =>
+      Json.obj(
+        "name" -> branch \ "name",
+        "url" -> JsString(uris._2 + "&sha=" + (branch \ "name").as[JsString].value)
+      ))
+  }
+
+  def fetchCommit(branch:JsObject):Seq[JsObject] = {
+    Logger.info("... fetching commit for branch [" + (branch \ "name").as[JsString].value + "]")
+    query((branch \ "url").as[JsString].value).as[JsArray].value.map( metaData =>
       Json.obj(
         "meta" -> Json.obj(
+          "branch" -> (branch \ "name"),
           "sha" -> (metaData \ "sha"),
+          "message" -> (metaData \ "commit" \ "message"),
           "committer" -> (metaData \ "commit" \ "committer" \ "name"),
           "commit_date" -> (metaData \ "commit" \ "committer" \ "date")
         ),
-        "url" -> JsString((metaData \ "commit" \ "tree" \ "url").as[JsString].value + "?recursive=1")
+        "url" -> (metaData \ "url")
       )
     )
-    parseAndStreamCommitTree(meta)
-  }
-  
-  def parseAndStreamCommitTree(metaData:Seq[JsObject]) = {
-    (Enumerator(metaData: _*) &> fetchCommitTree) >>> Enumerator.eof
   }
 
-  def fetchCommitTree = Enumeratee.map[JsObject] { metaData =>
-    Logger.info("... fetching commit [" + (metaData \ "meta"  \ "sha").as[JsString].value + "]")
-    val commit = query((metaData \ "url").as[JsString].value).as[JsObject] + ("meta", metaData \ "meta")
+  def toJSONCommits = Enumeratee.map[JsObject] { metaData =>
+    Logger.info("... fetching tree for commit [" + (metaData \ "meta"  \ "sha").as[JsString].value + "]")
     Json.obj(
-      "meta" -> commit \ "meta",
-      "files" -> JsArray((commit \ "tree").as[JsArray].value.filter(elem => "blob" == (elem \ "type").as[JsString].value).map( elem => {
-        val path: JsValue = elem \ "path"
+      "meta" -> metaData \ "meta",
+      "files" -> JsArray((query((metaData \ "url").as[JsString].value).as[JsObject] \ "files").as[JsArray].value.map( elem => {
+        val path: JsValue = elem \ "filename"
         val strPath = path.as[JsString].value
         val folder = strPath.lastIndexOf("/") match {
           case n:Int if n >= 0 => strPath.substring(0, n + 1)
