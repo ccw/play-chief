@@ -6,8 +6,8 @@ import play.api.libs.json._
 import scala.xml.Source
 import play.api.mvc.ResponseHeader
 import play.api.mvc.SimpleResult
-import org.xml.sax.InputSource
 import helpers.SchemaXMLParser
+import play.api.Play._
 
 /**
  * Schema 
@@ -21,7 +21,10 @@ object Schema extends Controller {
   }
 
   def json = Action {
-    val source: InputSource = Source.fromInputStream(Schema.getClass.getResourceAsStream("/schema.xml"))
+    val source = resourceAsStream("/schema.xml") match {
+      case Some(schema) => Option(Source.fromInputStream(schema))
+      case _ => None
+    }
     SimpleResult(
       header = ResponseHeader(200, Map(CONTENT_TYPE -> "application/json")),
       body = Enumerator(Json.prettyPrint(SchemaXMLParser.parse(source)).getBytes)
