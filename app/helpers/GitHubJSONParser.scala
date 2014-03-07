@@ -30,7 +30,7 @@ object GitHubJSONParser {
   }
 
   def fetchCommit(branch:JsObject):Seq[JsObject] = {
-    Logger.info("... fetching commit for branch [" + (branch \ "name").as[JsString].value + "]")
+    Logger.debug("... fetching commit for branch [" + (branch \ "name").as[JsString].value + "]")
     query((branch \ "url").as[JsString].value).as[JsArray].value.map( metaData =>
       Json.obj(
         "meta" -> Json.obj(
@@ -46,7 +46,7 @@ object GitHubJSONParser {
   }
 
   def toJSONCommits = Enumeratee.map[JsObject] { metaData =>
-    Logger.info("... fetching tree for commit [" + (metaData \ "meta"  \ "sha").as[JsString].value + "]")
+    Logger.debug("... fetching tree for commit [" + (metaData \ "meta"  \ "sha").as[JsString].value + "]")
     Json.obj(
       "meta" -> metaData \ "meta",
       "files" -> JsArray((query((metaData \ "url").as[JsString].value).as[JsObject] \ "files").as[JsArray].value.map( elem => {
@@ -70,7 +70,7 @@ object GitHubJSONParser {
   }
 
   private def query(URL:String) = {
-    Logger.info("...... querying [" + URL + "]")
+    Logger.debug("...... querying [" + URL + "]")
     Json.parse(Http(url(URL) OK as.String).apply())
   }
   

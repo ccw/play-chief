@@ -4,10 +4,8 @@ import play.api.mvc._
 import scala._
 import org.stringtemplate.v4.ST
 import java.text.SimpleDateFormat
-import play.Logger
 import java.util.Date
 import helpers.GitHubJSONParser
-import play.api.libs.json.JsObject
 
 /**
  * GitHub 
@@ -16,7 +14,7 @@ import play.api.libs.json.JsObject
  */
 object GitHub extends Controller {
 
-  val gitHubAPIHost = "http://github.digitalriverws.net/api/v3/repos"
+  val gitHubAPIHost = "https://github.digitalriverws.net/api/v3/repos"
   val branchAPIURI = gitHubAPIHost + "/<owner>/<repo>/branches"
   val commitAPIURI = gitHubAPIHost + "/<owner>/<repo>/commits?since=<since>"
   val inFormat = "yyyyMMdd"
