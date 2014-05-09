@@ -1,8 +1,10 @@
 import play.Project._
 
-name := "PlayChief"
+name := "chief-play"
 
 version := "1.0"
+
+javaHome := Some(file("/usr/lib/jvm/java-7-oracle/"))
 
 resolvers += "Scales Repo" at "http://scala-scales.googlecode.com/svn/repo"
 

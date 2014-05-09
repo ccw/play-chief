@@ -19,21 +19,21 @@ import play.api.Logger
 object Chief extends Controller {
 
   val uri = "http://firechief.digitalriver.com/fcweb/jsp/graph.jsp?rangeMax=&" +
-    "height=768&" +
-    "rangeMin=&" +
-    "width=640&" +
-    "dataSourceName=<ds>&" +
-    "table=drcc_page_hit&" +
-    "metrics=count%281%29%3Amax%28<measure>%29%3Aavg%28<measure>%29%3Amin%28<measure>%29&" +
-    "graphType=line&" +
-    "xCoordinateType=time-hourly&" +
-    "xCoordinate=creation_date&" +
-    "xDomainType=time-<period>&" +
-    "xCoordinateWhereClause=creation_date&" +
-    "addlWhereClause=site_selected%3D%27<site>%27+and+%281=0<urls:{url|+or+URI='<url>'}>%29&" +
-    "sequenceIdentifier=URI&" +
-    "orderBy=&" +
-    "having=&limit=&alpha=&chartTitle=Loading+Time"
+            "height=768&" +
+            "rangeMin=&" +
+            "width=640&" +
+            "dataSourceName=<ds>&" +
+            "table=drcc_page_hit&" +
+            "metrics=count%281%29%3Amax%28<measure>%29%3Aavg%28<measure>%29%3Amin%28<measure>%29&" +
+            "graphType=line&" +
+            "xCoordinateType=time-hourly&" +
+            "xCoordinate=creation_date&" +
+            "xDomainType=time-<period>&" +
+            "xCoordinateWhereClause=creation_date&" +
+            "addlWhereClause=site_selected%3D%27<site>%27+and+%281=0<urls:{url|+or+URI='<url>'}>%29&" +
+            "sequenceIdentifier=URI&" +
+            "orderBy=&" +
+            "having=&limit=&alpha=&chartTitle=Loading+Time"
 
   val dFormat: DecimalFormat = new DecimalFormat("#,###.0")
 

@@ -47,6 +47,7 @@
                         <div class="menu">
                             <div data-value="drh_read@@drhprd01" class="item">drh_read@@drhprd01</div>
                             <div data-value="drh_read@@drhprd03" class="item">drh_read@@drhprd03</div>
+                            <div data-value="drh_read@@drhprd10" class="item">drh_read@@drhprd10</div>
                             <div data-value="drh_read@@ordprd16" class="item">drh_read@@ordprd16</div>
                             <div data-value="drh_read@@ordprd19" class="item">drh_read@@ordprd19</div>
                             <div data-value="drh_read@@ordprd21" class="item">drh_read@@ordprd21</div>
@@ -120,8 +121,16 @@
                 </div>
             </form>
         </div>
-        <div class="actions item">
-            <div id="execute-button" class="ui button positive labeled">
+        <div class="actions item right">
+            <div id="fake-toggle" class="ui toggle checkbox">
+                <input name="fake" type="checkbox" value="true"/>
+                <label style="font-size: 0.8em">Dry!</label>
+            </div>
+            <!-- <div class="ui vertical divider">
+            </div> -->
+        <!--</div>
+        <div class="actions item right"> -->
+            <div id="execute-button" class="ui button positive labeled small">
                 <i class="icon play"></i>
                 <span class="text">Draw</span>
             </div>
@@ -130,10 +139,10 @@
 
     <div id="spinner"></div>
 
-    <script src="http://underscorejs.org/underscore-min.js"></script>
-    <script src='http://d3js.org/d3.v3.min.js'></script>
-    <script src='http://labratrevenge.com/d3-tip/javascripts/d3.tip.min.js'></script>
-    <script src='http://fgnass.github.io/spin.js/spin.min.js'></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/d3/3.4.6/d3.min.js'></script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/d3-tip/0.6.3/d3-tip.min.js'></script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.0/spin.min.js'></script>
     <script src='http://fgnass.github.io/spin.js/jquery.spin.js'></script>
     <script src='@routes.Assets.at("javascripts/chart.js")'></script>
 
@@ -146,6 +155,7 @@
                 draw(getQueryOptions());
             });
             $('.ui.selection.dropdown').dropdown();
+            $('.ui.toggle.checkbox').checkbox();
             loadPreviousOptions();
         });
 
@@ -159,6 +169,7 @@
                     $('div#period').dropdown('set selected', qOptions['period']);
                     $('div#measure').dropdown('set value', qOptions['measure']);
                     $('div#measure').dropdown('set selected', qOptions['measure']);
+                    //$('div#fake-toggle').checkbox()
                     var form = $('#config');
                     form.find('input[name="site"]').val(qOptions['site']);
                     form.find('textarea[name="urls"]').val(qOptions['urls'].join('\n'));
@@ -171,7 +182,8 @@
                             'measure': form.find('input[name="measure"]').val(),
                             'period': form.find('input[name="period"]').val(),
                             'site': form.find('input[name="site"]').val(),
-                            'urls': form.find('textarea[name="urls"]').val().split('\n')};
+                            'urls': form.find('textarea[name="urls"]').val().split('\n'),
+                            'fake': form.find('input[name="fake"]:checked' ).val()};
             if ('localStorage' in window && window['localStorage'] !== null) {
                 window['localStorage']['qOptions'] = JSON.stringify(qOptions);
             }

@@ -1,4 +1,4 @@
-PlayChief
+chief-play
 =========
 
-Scala Play for Chief Dashboard
+Dashboard made of (PlayFramework)[http://www.playframework.com]
