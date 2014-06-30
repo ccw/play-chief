@@ -5,7 +5,7 @@ import play.api.libs.iteratee.Enumerator
 import play.api.libs.json._
 import scala.xml.Source
 import play.api.mvc.ResponseHeader
-import play.api.mvc.SimpleResult
+import play.api.mvc.Result
 import helpers.SchemaXMLParser
 import play.api.Play._
 
@@ -25,7 +25,7 @@ object Schema extends Controller {
       case Some(schema) => Option(Source.fromInputStream(schema))
       case _ => None
     }
-    SimpleResult(
+    Result(
       header = ResponseHeader(200, Map(CONTENT_TYPE -> "application/json")),
       body = Enumerator(Json.prettyPrint(SchemaXMLParser.parse(source)).getBytes)
     )

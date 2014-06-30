@@ -1,20 +1,21 @@
 package controllers
 
-import play.api.mvc.{Controller, Action}
-import play.api.libs.iteratee.Enumerator
-import java.text.DecimalFormat
-import org.jsoup.Jsoup
+import java.text.{DecimalFormat, SimpleDateFormat}
+import java.util.Date
+
 import dispatch._
-import org.jsoup.nodes.Element
-import play.api.libs.json.{JsArray, JsString, JsNumber, Json}
+import org.jsoup.Jsoup
 import org.jsoup.helper.StringUtil
-import scala._
-import play.api.mvc.ResponseHeader
-import play.api.mvc.SimpleResult
+import org.jsoup.nodes.Element
 import org.stringtemplate.v4.ST
-import scala.collection.JavaConversions._
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.Logger
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.iteratee.Enumerator
+import play.api.libs.json.{JsArray, JsNumber, JsString, Json}
+import play.api.mvc.{Action, Controller, ResponseHeader, Result}
+
+import scala.collection.JavaConversions._
+import scala.util.Random
 
 object Chief extends Controller {
 
@@ -43,7 +44,7 @@ object Chief extends Controller {
 
   def graph = Action {
     implicit req =>
-      val pagingChief: String = getUrlFrom(req.queryString)
+      val pagingChief: String = formatString(uri, req.queryString)
       Logger.debug("paging chief with " + pagingChief)
       val values = Jsoup.parse(Http(url(pagingChief) OK as.String).apply())
         .select("area").iterator.toList.map {
@@ -62,118 +63,37 @@ object Chief extends Controller {
               v +(attributes(0).trim, jsValue)
           }
       }
-      SimpleResult(
+      Result(
         header = ResponseHeader(200, Map(CONTENT_TYPE -> "application/json")),
         body = Enumerator(Json.stringify(JsArray(values)).getBytes)
       )
   }
 
-  def getUrlFrom(params: Map[String, Seq[String]]) = {
-    val template = new ST(uri)
+  def formatString(templateContent:String, params: Map[String, Seq[String]]) = {
+    val template = new ST(templateContent)
     params.foreach {
       case (name: String, values: Seq[String]) => values.foreach(template.add(name, _))
     }
     template.render
   }
 
-  val fakeData = """[{"action":"/takeEditingOwnership.do","type":"min","y":10620,"x":"12/03/2013 18:00"},
-                   |{"action":"/takeEditingOwnership.do","type":"min","y":705,"x":"12/03/2013 17:00"},
-                   |{"action":"/takeEditingOwnership.do","type":"min","y":1021,"x":"12/03/2013 16:00"},
-                   |{"action":"/takeEditingOwnership.do","type":"avg","y":10620,"x":"12/03/2013 18:00"},
-                   |{"action":"/takeEditingOwnership.do","type":"avg","y":705,"x":"12/03/2013 17:00"},
-                   |{"action":"/takeEditingOwnership.do","type":"avg","y":7477.33,"x":"12/03/2013 16:00"},
-                   |{"action":"/takeEditingOwnership.do","type":"max","y":10620,"x":"12/03/2013 18:00"},
-                   |{"action":"/takeEditingOwnership.do","type":"max","y":705,"x":"12/03/2013 17:00"},
-                   |{"action":"/takeEditingOwnership.do","type":"max","y":12533,"x":"12/03/2013 16:00"},
-                   |{"action":"/takeEditingOwnership.do","type":"count","y":1,"x":"12/03/2013 18:00"},
-                   |{"action":"/takeEditingOwnership.do","type":"count","y":1,"x":"12/03/2013 17:00"},
-                   |{"action":"/takeEditingOwnership.do","type":"count","y":3,"x":"12/03/2013 16:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"min","y":4053,"x":"12/04/2013 02:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"min","y":1003,"x":"12/04/2013 00:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"min","y":795,"x":"12/03/2013 23:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"min","y":812,"x":"12/03/2013 22:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"min","y":1344,"x":"12/03/2013 21:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"min","y":1429,"x":"12/03/2013 20:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"min","y":1335,"x":"12/03/2013 18:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"min","y":1798,"x":"12/03/2013 17:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"min","y":1942,"x":"12/03/2013 16:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"min","y":2397,"x":"12/03/2013 14:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"avg","y":4155.5,"x":"12/04/2013 02:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"avg","y":2321.5,"x":"12/04/2013 00:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"avg","y":2657,"x":"12/03/2013 23:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"avg","y":1864.14,"x":"12/03/2013 22:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"avg","y":2132.67,"x":"12/03/2013 21:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"avg","y":2426,"x":"12/03/2013 20:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"avg","y":3792.67,"x":"12/03/2013 18:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"avg","y":7599.3,"x":"12/03/2013 17:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"avg","y":5159.08,"x":"12/03/2013 16:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"avg","y":3382.67,"x":"12/03/2013 14:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"max","y":4258,"x":"12/04/2013 02:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"max","y":3640,"x":"12/04/2013 00:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"max","y":3737,"x":"12/03/2013 23:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"max","y":3303,"x":"12/03/2013 22:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"max","y":3320,"x":"12/03/2013 21:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"max","y":4311,"x":"12/03/2013 20:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"max","y":6494,"x":"12/03/2013 18:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"max","y":21839,"x":"12/03/2013 17:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"max","y":21738,"x":"12/03/2013 16:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"max","y":5222,"x":"12/03/2013 14:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"count","y":2,"x":"12/04/2013 02:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"count","y":2,"x":"12/04/2013 00:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"count","y":4,"x":"12/03/2013 23:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"count","y":7,"x":"12/03/2013 22:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"count","y":3,"x":"12/03/2013 21:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"count","y":4,"x":"12/03/2013 20:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"count","y":9,"x":"12/03/2013 18:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"count","y":10,"x":"12/03/2013 17:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"count","y":24,"x":"12/03/2013 16:00"},
-                   |{"action":"/editProductSettingsAjax.do","type":"count","y":3,"x":"12/03/2013 14:00"},
-                   |{"action":"/editProduct.do","type":"min","y":22604,"x":"12/04/2013 02:00"},
-                   |{"action":"/editProduct.do","type":"min","y":1550,"x":"12/04/2013 00:00"},
-                   |{"action":"/editProduct.do","type":"min","y":1063,"x":"12/03/2013 23:00"},
-                   |{"action":"/editProduct.do","type":"min","y":1407,"x":"12/03/2013 22:00"},
-                   |{"action":"/editProduct.do","type":"min","y":20822,"x":"12/03/2013 21:00"},
-                   |{"action":"/editProduct.do","type":"min","y":2114,"x":"12/03/2013 20:00"},
-                   |{"action":"/editProduct.do","type":"min","y":17896,"x":"12/03/2013 18:00"},
-                   |{"action":"/editProduct.do","type":"min","y":15190,"x":"12/03/2013 17:00"},
-                   |{"action":"/editProduct.do","type":"min","y":4104,"x":"12/03/2013 16:00"},
-                   |{"action":"/editProduct.do","type":"min","y":16483,"x":"12/03/2013 15:00"},
-                   |{"action":"/editProduct.do","type":"avg","y":22604,"x":"12/04/2013 02:00"},
-                   |{"action":"/editProduct.do","type":"avg","y":1550,"x":"12/04/2013 00:00"},
-                   |{"action":"/editProduct.do","type":"avg","y":7031.6,"x":"12/03/2013 23:00"},
-                   |{"action":"/editProduct.do","type":"avg","y":12895,"x":"12/03/2013 22:00"},
-                   |{"action":"/editProduct.do","type":"avg","y":20822,"x":"12/03/2013 21:00"},
-                   |{"action":"/editProduct.do","type":"avg","y":8009.33,"x":"12/03/2013 20:00"},
-                   |{"action":"/editProduct.do","type":"avg","y":17896,"x":"12/03/2013 18:00"},
-                   |{"action":"/editProduct.do","type":"avg","y":25237.25,"x":"12/03/2013 17:00"},
-                   |{"action":"/editProduct.do","type":"avg","y":17727.25,"x":"12/03/2013 16:00"},
-                   |{"action":"/editProduct.do","type":"avg","y":16483,"x":"12/03/2013 15:00"},
-                   |{"action":"/editProduct.do","type":"max","y":22604,"x":"12/04/2013 02:00"},
-                   |{"action":"/editProduct.do","type":"max","y":1550,"x":"12/04/2013 00:00"},
-                   |{"action":"/editProduct.do","type":"max","y":9668,"x":"12/03/2013 23:00"},
-                   |{"action":"/editProduct.do","type":"max","y":28789,"x":"12/03/2013 22:00"},
-                   |{"action":"/editProduct.do","type":"max","y":20822,"x":"12/03/2013 21:00"},
-                   |{"action":"/editProduct.do","type":"max","y":16557,"x":"12/03/2013 20:00"},
-                   |{"action":"/editProduct.do","type":"max","y":17896,"x":"12/03/2013 18:00"},
-                   |{"action":"/editProduct.do","type":"max","y":30314,"x":"12/03/2013 17:00"},
-                   |{"action":"/editProduct.do","type":"max","y":35509,"x":"12/03/2013 16:00"},
-                   |{"action":"/editProduct.do","type":"max","y":16483,"x":"12/03/2013 15:00"},
-                   |{"action":"/editProduct.do","type":"count","y":1,"x":"12/04/2013 02:00"},
-                   |{"action":"/editProduct.do","type":"count","y":1,"x":"12/04/2013 00:00"},
-                   |{"action":"/editProduct.do","type":"count","y":5,"x":"12/03/2013 23:00"},
-                   |{"action":"/editProduct.do","type":"count","y":3,"x":"12/03/2013 22:00"},
-                   |{"action":"/editProduct.do","type":"count","y":1,"x":"12/03/2013 21:00"},
-                   |{"action":"/editProduct.do","type":"count","y":3,"x":"12/03/2013 20:00"},
-                   |{"action":"/editProduct.do","type":"count","y":1,"x":"12/03/2013 18:00"},
-                   |{"action":"/editProduct.do","type":"count","y":4,"x":"12/03/2013 17:00"},
-                   |{"action":"/editProduct.do","type":"count","y":8,"x":"12/03/2013 16:00"},
-                   |{"action":"/editProduct.do","type":"count","y":1,"x":"12/03/2013 15:00"}]""".stripMargin
+  val fakeData = """{"action":"/takeEditingOwnership.do","type":"min","y":<min>,"x":"<time>"},
+                    |{"action":"/takeEditingOwnership.do","type":"avg","y":<avg>,"x":"<time>"},
+                    |{"action":"/takeEditingOwnership.do","type":"max","y":<max>,"x":"<time>"},
+                    |{"action":"/takeEditingOwnership.do","type":"count","y":<count>,"x":"<time>"}""".stripMargin
 
   def fake() = Action {
     implicit req =>
-      SimpleResult(
+      Result(
         header = ResponseHeader(200, Map(CONTENT_TYPE -> "application/json")),
-        body = Enumerator(fakeData.getBytes)
+        body = Enumerator(("[" + Seq(randomValues(0), randomValues(1)).mkString(",") + "]").getBytes)
       )
   }
+
+  def randomValues(factor:Long) = formatString(fakeData, Map("min" -> Seq((Random.nextInt(10) + 1).toString),
+                                                "avg" -> Seq((Random.nextInt(5) + 5).toString),
+                                                "max" -> Seq((Random.nextInt(10) + 10).toString),
+                                                "count" -> Seq((Random.nextInt(3) + 1).toString),
+                                                "time" -> Seq(new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.sss").format(new Date(System.currentTimeMillis + 1000 * factor)))))
+
 }

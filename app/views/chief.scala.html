@@ -116,20 +116,20 @@
                 </div>
                 <div class="field">
                     <label>URLs</label>
-                    <textarea name="urls" style="height : 450px ;">/gc/ent/catalog/editProduct.do</textarea>
-                    <p class="ui label detail bottom right attached">Separated by CRLFs</p>
+                    <textarea name="urls" placeholder="URLs" style="height : 450px ;">/gc/ent/catalog/editProduct.do</textarea>
+                    <p style="color:gray; font-size: 0.75em; margin-top: -18px; text-align: right; padding-right: 5px;">Separated by CRLFs</p>
+                </div>
+                <div class="field"> 
+                    <div class="ui right aligned basic segment">
+                        <div id="fake-toggle" class="ui toggle checkbox">
+                            <input name="fake" type="checkbox" value="true"/>
+                            <label>Dry?</label>
+                        </div>
+                    </div>                   
                 </div>
             </form>
         </div>
-        <div class="actions item right">
-            <div id="fake-toggle" class="ui toggle checkbox">
-                <input name="fake" type="checkbox" value="true"/>
-                <label style="font-size: 0.8em">Dry!</label>
-            </div>
-            <!-- <div class="ui vertical divider">
-            </div> -->
-        <!--</div>
-        <div class="actions item right"> -->
+        <div class="actions item">
             <div id="execute-button" class="ui button positive labeled small">
                 <i class="icon play"></i>
                 <span class="text">Draw</span>
@@ -151,8 +151,9 @@
             $('.ui.sidebar').first().sidebar('attach events', '#call-button');
             $('#execute-button').on('click', function() {
                 $('#spinner').spin({length:50, radius: 30, width: 15, top: 200});
-                $('#chart svg').remove();
-                draw(getQueryOptions());
+                try {
+                    draw(getQueryOptions());
+                } catch (e) { console.log(e); }
             });
             $('.ui.selection.dropdown').dropdown();
             $('.ui.toggle.checkbox').checkbox();
@@ -169,7 +170,6 @@
                     $('div#period').dropdown('set selected', qOptions['period']);
                     $('div#measure').dropdown('set value', qOptions['measure']);
                     $('div#measure').dropdown('set selected', qOptions['measure']);
-                    //$('div#fake-toggle').checkbox()
                     var form = $('#config');
                     form.find('input[name="site"]').val(qOptions['site']);
                     form.find('textarea[name="urls"]').val(qOptions['urls'].join('\n'));
