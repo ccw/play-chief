@@ -84,16 +84,17 @@ object Chief extends Controller {
 
   def fake() = Action {
     implicit req =>
+        val time = System.currentTimeMillis
       Result(
         header = ResponseHeader(200, Map(CONTENT_TYPE -> "application/json")),
-        body = Enumerator(("[" + Seq(randomValues(0), randomValues(1)).mkString(",") + "]").getBytes)
+        body = Enumerator(("[" + Range(0, 6).reverse.foldLeft(List[String]()) { (coll, i) => coll :+ randomValues(time, i) }.mkString(",") + "]").getBytes)
       )
   }
 
-  def randomValues(factor:Long) = formatString(fakeData, Map("min" -> Seq((Random.nextInt(10) + 1).toString),
-                                                "avg" -> Seq((Random.nextInt(5) + 5).toString),
-                                                "max" -> Seq((Random.nextInt(10) + 10).toString),
-                                                "count" -> Seq((Random.nextInt(3) + 1).toString),
-                                                "time" -> Seq(new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.sss").format(new Date(System.currentTimeMillis + 1000 * factor)))))
+  def randomValues(time:Long, factor:Long) = formatString(fakeData, Map("min" -> Seq((Random.nextInt(10) + 1).toString),
+                                                                        "avg" -> Seq((Random.nextInt(5) + 5).toString),
+                                                                        "max" -> Seq((Random.nextInt(10) + 10).toString),
+                                                                        "count" -> Seq((Random.nextInt(3) + 1).toString),
+                                                                        "time" -> Seq(new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.sss").format(new Date(time - 5000 * factor)))))
 
 }
