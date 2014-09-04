@@ -2,7 +2,7 @@ var margin = {top: 20, right: 150, bottom: 50, left: 60},
     width = 1250 - margin.left - margin.right,
     h = 225;
 
-var fd = d3.time.format("%m/%d/%Y %H:%M:%S.%L");
+var fd = d3.time.format("%m/%d/%Y %H:%M");
 var ft = d3.format(".2s");
 var tn = function (d) { return d.y; };
 var td = function (d) { return fd.parse(d.x); };
@@ -82,7 +82,7 @@ var draw = function (options) {
 
         _draw(s, data, groups);
 
-        setInterval(_update, 5000);
+        setInterval(_update, 60000);
     });
 };
 
