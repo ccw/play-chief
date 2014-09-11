@@ -1,7 +1,7 @@
 package controllers
 
 import java.text.{DecimalFormat, SimpleDateFormat}
-import java.util.{Calendar, Date, TimeZone}
+import java.util.{Locale, Calendar, Date, TimeZone}
 
 import dispatch._
 import org.jsoup.Jsoup
@@ -42,7 +42,7 @@ object Chief extends Controller {
                          |{"action":"<action>","type":"count","y":<count>,"x":"<time>"}""".stripMargin
 
     val dFormat = new DecimalFormat("#,###.0")
-    val tInFormat = new SimpleDateFormat("EEE MM/dd/yyyy HH:mm z")
+    val tInFormat = new SimpleDateFormat("EEE MM/dd/yyyy HH:mm z", Locale.US)
     val tFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm")
 
     def index = Action {
