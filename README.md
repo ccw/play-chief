@@ -1,4 +1,4 @@
-chief-play
+play-chief
 =========
 
-Dashboard made of (PlayFramework)[http://www.playframework.com]
+Dashboard made of [PlayFramework](http://www.playframework.com)
